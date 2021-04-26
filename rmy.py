@@ -10,8 +10,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import threading
-import schedule
+from apscheduler.schedulers.background import BackgroundScheduler
 import time
 
 client = discord.Client()
@@ -29,6 +28,8 @@ opts.add_argument("--no-sandbox")
 opts.add_argument("--disable-dev-sh-usage")
 
 driver = Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=opts)
+
+scheduler = BackgroundScheduler()
 
 #Sub of the Week
 sotw = ''
@@ -54,27 +55,35 @@ async def on_message(message):
 
     # Command Level
     if args[0] == 'pubsub':
-        print('sub of da week: ' + sotw)
-        await message.channel.send(f'This week\'s Publix Sub is the {get_sub()}!')
+        sub_response = get_sub_of_the_week() if (len(args) == 2 and args[1] == 'update') else get_sub()
+        if sub_response != '':           
+            await message.channel.send(f'This week\'s Publix Sub is the {sub_response}!')
+        else:
+            await message.channel.send('There was an error while retrieving the Sub of the Week. Please try again later.')
 
+    if args[0] == 'flaccid':
+        await message.channel.send('https://tenor.com/view/meryl-streep-flacid-gif-10066576')
 
 def get_sub_of_the_week():
-    print('Fetching Sub of the Week...')
-    try:
-        set_publix_store()
-        driver.get('https://www.publix.com/savings/weekly-ad')
-        driver.find_element_by_xpath("//a[@id='deli']").click()
-        sub = driver.find_element_by_xpath("//div[contains(text(),'Whole Sub')]").text
-        global sotw
-        sotw = sub
-        print('Sub successfully retrieved!')
-        return sub
-    except:
-        print('There was an error while retrieving the sub of the week.')
+    global sotw
+    i = 0
+    while i < 3:
+        print('Fetching Sub of the Week...')
+        try:
+            set_publix_store()
+            driver.get('https://www.publix.com/savings/weekly-ad')
+            driver.find_element_by_xpath("//a[@id='deli']").click()
+            sotw = driver.find_element_by_xpath("//div[contains(text(),'Whole Sub')]").text
+            print('Sub successfully retrieved.')
+            break
+        except:
+            print('There was an error while retrieving the sub of the week.')
+        i += 1
+    return sotw
 
 def get_sub():
     if sotw != '':
-        print('Sub already retrieved')
+        print('Sub already retrieved.')
         return sotw
     else:
         return get_sub_of_the_week()
@@ -89,24 +98,13 @@ def set_publix_store():
         driver.implicitly_wait(4)
         driver.find_element_by_xpath("//button[contains(text(),'Choose Store')]").click()
     except:
-        print('Store already selected')
+        print('Store already selected.')
 
-def run_continuously():
-    cease_continuous_run = threading.Event()
-    class ScheduleThread(threading.Thread):
-        @classmethod
-        def run(cls):
-            while not cease_continuous_run.is_set():
-                schedule.run_pending()
-                time.sleep(1)
 
-    continuous_thread = ScheduleThread()
-    continuous_thread.start()
-    return cease_continuous_run
+@scheduler.scheduled_job('cron', day_of_week='wed', hour=11)
+def get_sub_of_the_week_scheduler():
+    print('getting subs')
+    get_sub_of_the_week()
 
-schedule.every().wednesday.at('11:00').do(get_sub_of_the_week)
-
-# Start the background thread
-run_continuously()
-
+scheduler.start()
 client.run(TOKEN)
