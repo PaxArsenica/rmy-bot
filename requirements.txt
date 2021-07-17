@@ -2,3 +2,4 @@ discord.py==1.5.1
 selenium==3.141.0
 python-dotenv==0.15.0
 APscheduler==3.7.0
+requests==2.25.1

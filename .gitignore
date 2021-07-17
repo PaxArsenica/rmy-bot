@@ -1,3 +1,4 @@
 .ssh/
 .env
-
+*.pyc
+*.log
