@@ -1,9 +1,7 @@
 import os
-from dotenv import load_dotenv
-from selenium.webdriver import Chrome, ChromeOptions
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import Chrome, ChromeOptions
 
-load_dotenv()
 
 opts = ChromeOptions()
 opts.binary_location = os.environ.get("GOOGLE_CHROME_BIN")

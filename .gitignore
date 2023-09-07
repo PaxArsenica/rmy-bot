@@ -1,4 +1,6 @@
-.ssh/
-.env
-*.pyc
+launch.json
 *.log
+__pycache__
+*.pyc
+.ssh/
+.vscode/
