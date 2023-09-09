@@ -1,26 +1,27 @@
+import common.utils as utils
 import html
 import requests
+from models.pubsub_schemas import Store, Sub
 from os import environ as env
 from typing import List
 
-class Sub:
-    def __init__(self, name: str, description: str = "", image: str = "") -> None:
-        self.name = name
-        self.description = description
-        self.image = image
-
-class Store:
-    def __init__(self, id: str, name: str) -> None:
-        self.id = id
-        self.name = name
-
-#Sub of the Week
-sotw: List[Sub] = []
+log = utils.setup_logging('pubsub')
+defaultStore = Store("00776", "Publix at Piedmont")
 
 def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
-    sotw.clear()
+    #Sub of the Week
+    sotw: List[Sub] = []
     store = get_store(env['ZIP_CODE']) if not zip_code else get_store(zip_code)
-    response = requests.request("GET", f"https://services.publix.com/api/v3/product/SearchMultiCategory?storeNumber={store.id}&sort=popularityrank+asc,+titlecopy+asc&rowCount=60&orderAheadOnly=true&facet=onsalemsg::On+Sale&categoryIdList=d3a5f2da-3002-4c6d-949c-db5304577efb", data="", headers={}, params={})
+
+    try:
+        response = requests.request("GET", f"https://services.publix.com/api/v3/product/SearchMultiCategory?storeNumber={store.id}&sort=popularityrank+asc,+titlecopy+asc&rowCount=60&orderAheadOnly=true&facet=onsalemsg::On+Sale&categoryIdList=d3a5f2da-3002-4c6d-949c-db5304577efb", data="", headers={}, params={})
+        response.raise_for_status()
+        if len(response.json()) == 0:
+            log.error(f"No subs were returned.")
+            return sotw
+    except Exception as err:
+        log.error(f"Error during fetch_sub_of_the_week request: {err}")
+        return sotw
 
     for product in response.json()[0]:
         sub: str = html.unescape(product["title"])
@@ -31,10 +32,15 @@ def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
     return sotw
 
 def get_store(zip_code: str) -> Store:
-    response = requests.request("GET", "https://services.publix.com/api/v1/storelocation", data="", headers={}, params={"types": "R,G,H,N,S", "option": "", "count": "15", "includeOpenAndCloseDates": "true"," isWebsite": "true", "zipCode": zip_code})
-
-    if response.status_code != 200 or len(response.json()["Stores"]) == 0:
-        return Store("00776", "Publix at Piedmont")
+    try:
+        response = requests.request("GET", "https://services.publix.com/api/v1/storelocation", data="", headers={}, params={"types": "R,G,H,N,S", "option": "", "count": "15", "includeOpenAndCloseDates": "true"," isWebsite": "true", "zipCode": zip_code})
+        response.raise_for_status()
+        if len(response.json()["Stores"]) == 0:
+            log.warning(f"No stores nearby... default store is returned.")
+            return defaultStore
+    except Exception as err:
+        log.error(f"Error during get_store request: {err}")
+        return defaultStore
 
     id = response.json()["Stores"][0]["KEY"]
     name = response.json()["Stores"][0]["NAME"]

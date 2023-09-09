@@ -13,7 +13,7 @@ from os import environ as env
 
 
 load_dotenv()
-log = utils.setup_logging('RmyBot')
+log = utils.setup_logging('rmy')
 
 bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all())
 
