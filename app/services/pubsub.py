@@ -3,12 +3,12 @@ import html
 import requests
 from models.pubsub_schemas import Store, Sub
 from os import environ as env
-from typing import List
+from typing import List, Tuple
 
 log = utils.setup_logging('pubsub')
 defaultStore = Store("00776", "Publix at Piedmont")
 
-def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
+def fetch_sub_of_the_week(zip_code: str = "") -> Tuple[List[Sub], Store]:
     #Sub of the Week
     sotw: List[Sub] = []
     store = get_store(env['ZIP_CODE']) if not zip_code else get_store(zip_code)
@@ -29,7 +29,7 @@ def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
         image: str = html.unescape(product["productimages"]) if product["productimages"] else ""
         if "sub" in sub.lower():
             sotw.append(Sub(sub, description, image))
-    return sotw
+    return sotw, store
 
 def get_store(zip_code: str) -> Store:
     try:
