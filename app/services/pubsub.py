@@ -31,11 +31,11 @@ def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
     return sotw
 
 def get_store(zip_code: str) -> Store:
-    response = requests.request("GET", "https://services.publix.com/api/v1/storelocation", data="", headers={}, params={"types":"R,G,H,N,S", "option":"", "count":"15", "includeOpenAndCloseDates":"true"," isWebsite":"true", "zipCode": zip_code})
+    response = requests.request("GET", "https://services.publix.com/api/v1/storelocation", data="", headers={}, params={"types": "R,G,H,N,S", "option": "", "count": "15", "includeOpenAndCloseDates": "true"," isWebsite": "true", "zipCode": zip_code})
 
-    if response.status_code != 200:
+    if response.status_code != 200 or len(response.json()["Stores"]) == 0:
         return Store("00776", "Publix at Piedmont")
-    
+
     id = response.json()["Stores"][0]["KEY"]
     name = response.json()["Stores"][0]["NAME"]
     return Store(id, name)

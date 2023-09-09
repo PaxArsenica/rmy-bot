@@ -1,4 +1,5 @@
 import common.utils as utils
+import os
 from discord import Color, Embed, File
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
@@ -14,7 +15,9 @@ class Messages(commands.Cog, name='messages'):
 
     @commands.hybrid_command(name='about', description='Posts details about RmyBot.')
     async def about(self, ctx: Context) -> None:
-        rmy_bot_logo = File("./img/rmybot.png", filename="rmybot.png")
+        img_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "rmybot.png"))
+
+        rmy_bot_logo = File(img_path, filename="rmybot.png")
         about_embed = Embed(title='RMY Bot', color=Color.red(), description=f"My name is RMY Bot v0.1. My purpose is to entertain the members of RMY with fun and useful commands. Type '{env['BOT_PREFIX']} list_commands' to learn more about what I can do.")
         about_embed.set_image(url='attachment://rmybot.png')
         await ctx.send(file=rmy_bot_logo, embed=about_embed)

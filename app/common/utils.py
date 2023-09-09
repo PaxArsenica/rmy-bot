@@ -1,5 +1,6 @@
 import discord.utils as utils
 import logging
+import sys
 from common.errors import NotAdmin
 from discord import Message
 from discord.ext import commands
@@ -10,18 +11,21 @@ from logging import Logger
 from os import environ as env
 from typing import Any
 
+def debugger_is_active() -> bool:
+    """Return if the debugger is currently active"""
+    return hasattr(sys, 'gettrace') and sys.gettrace() is not None
 
 def setup_logging(name: str) -> Logger:
     log = logging.getLogger(name)
     log.setLevel(env['LOG_LEVEL'])
 
-    file_handler = logging.FileHandler(filename=env['LOG_FILE'])
-    file_handler.setFormatter(logging.Formatter(env['LOG_FORMAT']))
+    if debugger_is_active():
+        file_handler = logging.FileHandler(filename=env['LOG_FILE'])
+        file_handler.setFormatter(logging.Formatter(env['LOG_FORMAT']))
+        log.addHandler(file_handler)
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(utils._ColourFormatter())
-
-    log.addHandler(file_handler)
     log.addHandler(console_handler)
     
     return log

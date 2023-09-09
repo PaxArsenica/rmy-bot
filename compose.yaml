@@ -1,0 +1,12 @@
+services:
+  rmy-bot:
+    build:
+      context: .
+      tags:
+        - rmy-bot:composed
+        - rmy-bot:latest
+    env_file: .env
+    image: rmy-bot
+    ports:
+      - 8000:8000
+    restart: always
