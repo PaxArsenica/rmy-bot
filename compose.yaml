@@ -9,4 +9,4 @@ services:
     image: rmy-bot
     ports:
       - 8000:8000
-    restart: always
+    #restart: always
