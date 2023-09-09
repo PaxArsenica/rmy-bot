@@ -1,55 +1,41 @@
-import os
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import Chrome, ChromeOptions
+import html
+import requests
+from os import environ as env
+from typing import List
 
+class Sub:
+    def __init__(self, name: str, description: str = "", image: str = "") -> None:
+        self.name = name
+        self.description = description
+        self.image = image
 
-opts = ChromeOptions()
-opts.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-opts.add_argument("--headless")
-opts.add_argument("--no-sandbox")
-opts.add_argument("--disable-dev-sh-usage")
-opts.add_argument("--window-size=1920,1080")
-opts.add_argument('--disable-dev-shm-usage')
-opts.add_argument('--ignore-certificate-errors')
-opts.add_argument('--allow-running-insecure-content')
-driver = Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=opts)
-driver.execute_cdp_cmd(
-    "Browser.grantPermissions",
-    {
-        "origin": "https://www.publix.com/",
-        "permissions": ["geolocation"]
-    },
-)
-driver.execute_cdp_cmd("Emulation.setGeolocationOverride", {
-    "latitude": 33.75074105969834,
-    "longitude": -84.39513846451307,
-    "accuracy": 100
-})
-
+class Store:
+    def __init__(self, id: str, name: str) -> None:
+        self.id = id
+        self.name = name
 
 #Sub of the Week
-sotw = ''
+sotw: List[Sub] = []
 
-def fetch_sub_of_the_week():
-    global sotw
-    i = 0
-    while i < 3:
-        print('Fetching Sub of the Week...')
-        try:
-            driver.get('https://www.publix.com/savings/weekly-ad/view-all?keyword=sub')
-            driver.implicitly_wait(3)
-            sotw = driver.find_element("xpath", "//span[contains(text(),'Whole')][contains(text(),'Sub')]").text      
-            print('Sub successfully retrieved.')
-            break
-        except NoSuchElementException as e:
-            print(e)
-            print('There was an error while retrieving the sub of the week.')
-        i += 1
+def fetch_sub_of_the_week(zip_code: str = "") -> List[Sub]:
+    sotw.clear()
+    store = get_store(env['ZIP_CODE']) if not zip_code else get_store(zip_code)
+    response = requests.request("GET", f"https://services.publix.com/api/v3/product/SearchMultiCategory?storeNumber={store.id}&sort=popularityrank+asc,+titlecopy+asc&rowCount=60&orderAheadOnly=true&facet=onsalemsg::On+Sale&categoryIdList=d3a5f2da-3002-4c6d-949c-db5304577efb", data="", headers={}, params={})
+
+    for product in response.json()[0]:
+        sub: str = html.unescape(product["title"])
+        description: str = html.unescape(product["shortdescription1"]) if product["shortdescription1"] else ""
+        image: str = html.unescape(product["productimages"]) if product["productimages"] else ""
+        if "sub" in sub.lower():
+            sotw.append(Sub(sub, description, image))
     return sotw
 
-def get_sub():
-    if sotw != '':
-        print('Sub already retrieved.')
-        return sotw
-    else:
-        return fetch_sub_of_the_week()
+def get_store(zip_code: str) -> Store:
+    response = requests.request("GET", "https://services.publix.com/api/v1/storelocation", data="", headers={}, params={"types":"R,G,H,N,S", "option":"", "count":"15", "includeOpenAndCloseDates":"true"," isWebsite":"true", "zipCode": zip_code})
+
+    if response.status_code != 200:
+        return Store("00776", "Publix at Piedmont")
+    
+    id = response.json()["Stores"][0]["KEY"]
+    name = response.json()["Stores"][0]["NAME"]
+    return Store(id, name)
