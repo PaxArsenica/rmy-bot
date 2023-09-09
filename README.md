@@ -4,12 +4,15 @@
 
 1. Install Python version listed in Dockerfile
 
-2. Install dependencies through pip
+1. Install dependencies through pip
     
     ```bash
     pip install -r requirements.txt
     ```
-3. Run Bot Script
+
+1. Update the values appropriately in .env
+
+1. Run Bot Script
 
     ```bash
     python app/rmy.py
@@ -25,13 +28,13 @@
     docker build --tag rmy-bot .
     ```
 
-2. Run container
+1. Run container
 
     ```bash
     docker run -d --env-file .env rmy-bot
     ```
 
-3. If you wish to maintain constant up-time on your hosted device run the following instead
+1. If you wish to maintain constant up-time on your hosted device run the following instead
 
     ```bash
     docker run -d --env-file .env --restart always rmy-bot
@@ -45,7 +48,7 @@
     docker-compose up
     ```
 
-2. If you wish to maintain constant up-time on your hosted device uncomment the following in compose.yaml
+1. If you wish to maintain constant up-time on your hosted device uncomment the following in compose.yaml
 
     ```bash
     restart: always
