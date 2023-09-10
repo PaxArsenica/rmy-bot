@@ -30,7 +30,7 @@ class Messages(commands.Cog, name='messages'):
     async def bot(self, ctx: Context) -> None:
         await ctx.send("https://tenor.com/view/you-are-bot-noob-bot-you-are-noob-ur-noob-gif-22801538")
 
-    @commands.hybrid_command(name='flaccid', description='Rosts a flaccid gif.')
+    @commands.hybrid_command(name='flaccid', description='Posts a flaccid gif.')
     async def flaccid(self, ctx: Context) -> None:
         await ctx.send("https://tenor.com/view/meryl-streep-flacid-gif-10066576")
 
