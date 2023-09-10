@@ -53,20 +53,20 @@ class Messages(commands.Cog, name='messages'):
 
     @commands.hybrid_command(name='pubsub', description='Posts the pubsub of the week.')
     async def pubsub(self, ctx: Context, zip_code: str = None) -> None:
-        sub_response = fetch_sub_of_the_week(zip_code)
+        subs, store = fetch_sub_of_the_week(zip_code)
 
         embeds: List[Embed] = []
         tender = False
 
-        if sub_response[0]:
-            for sub in sub_response[0]:
+        if subs:
+            for sub in subs:
                 embed = Embed(color=Color.green())
                 embed.add_field(name=sub.name, value=sub.description, inline=False)
                 embed.set_image(url=sub.image)
                 embeds.append(embed)
                 if sub.name.lower().find('tender') != -1:
                     tender = True
-            await ctx.send(content=f"This week's Publix Subs at {sub_response[1].name} are", embeds=embeds)
+            await ctx.send(content=f"This week's Publix Subs at {store.name} are", embeds=embeds)
 
             if tender:
                 await ctx.send("https://tenor.com/view/lets-go-lets-goo-lest-gooooooooooooooooo-gif-19416648")
