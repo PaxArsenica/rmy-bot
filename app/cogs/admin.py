@@ -14,7 +14,6 @@ class Admin(commands.Cog, name='admin'):
     @utils.is_admin()
     @commands.command(name='desync', description='Deyncs all global commands.')
     async def desync(self, ctx: Context, guild: str = "True") -> None:
-        embed = Embed(description="Desyncing commands...", color=Color.yellow())
         log.info("Desyncing commands...")
         try:
             guild_bool = utils.str_to_bool(guild)
@@ -23,6 +22,7 @@ class Admin(commands.Cog, name='admin'):
             embed = Embed(description=f"Invalid bool input... must be 'true' or 'false'.", color=Color.brand_red())
             await ctx.send(embed=embed)
 
+        embed = Embed(description="Desyncing commands...", color=Color.yellow())
         await ctx.send(embed=embed)
 
         if guild_bool:
@@ -56,7 +56,6 @@ class Admin(commands.Cog, name='admin'):
     @utils.is_admin()
     @commands.command(name='sync', description='Syncs all global commands.')
     async def sync(self, ctx: Context, guild: str = "True") -> None:
-        embed = Embed(description="Syncing commands...", color=Color.yellow())
         log.info("Syncing commands...")
         try:
             guild_bool = utils.str_to_bool(guild)
@@ -65,6 +64,7 @@ class Admin(commands.Cog, name='admin'):
             embed = Embed(description=f"Invalid bool input... must be 'true' or 'false'.", color=Color.brand_red())
             await ctx.send(embed=embed)
 
+        embed = Embed(description="Syncing commands...", color=Color.yellow())
         await ctx.send(embed=embed)
 
         if guild_bool:

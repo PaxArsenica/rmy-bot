@@ -15,7 +15,7 @@ from os import environ as env
 load_dotenv()
 log = utils.setup_logging('rmy')
 
-bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all())
+bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all(), help_command=None)
 
 async def init_db() -> None:
     dynamodb = boto3.resource('dynamodb', region_name=env['AWS_DEFAULT_REGION'])

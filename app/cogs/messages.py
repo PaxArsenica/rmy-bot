@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from os import environ as env
 from services.pubsub import fetch_sub_of_the_week
-from typing import List
+from typing import List, Tuple
 
 log = utils.setup_logging('Messages')
 
@@ -36,10 +36,22 @@ class Messages(commands.Cog, name='messages'):
 
     @commands.hybrid_command(name='list_commands', description='Returns all commands available.')
     async def list_commands(self, ctx: Context) -> None:
-        command_list = []
-        embed = Embed(title="RMY Bot Commands", color=Color.red(), description="Here's a list of my commands:")
+        command_list: List[str, str] = []
+        admin_command_list: List[str, str] = []
+        embed = Embed(title="RMY Bot Commands", color=Color.green(), description="Here's a list of my commands:")
         for command in self.bot.commands:
-            command_list.append((command.name, command.description))
+            if command.cog_name == 'admin':
+                if utils.is_admin(ctx.author.id):
+                    admin_command_list.append((command.name, command.description))
+            else:
+                command_list.append((command.name, command.description))
+
+        if admin_command_list:
+            admin_embed = Embed(title="RMY Bot Commands", color=Color.red(), description="Here's a list of my admin commands:")
+            admin_command_list.sort()
+            for command in admin_command_list:
+                admin_embed.add_field(name=command[0], value=command[1], inline=False)
+            await ctx.author.send(embed=admin_embed)
 
         command_list.sort()
         for command in command_list:
