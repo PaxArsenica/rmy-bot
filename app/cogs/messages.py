@@ -4,7 +4,7 @@ from discord import Color, Embed, File
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from os import environ as env
-from services.pubsub import fetch_sub_of_the_week, get_store
+from services.pubsub import fetch_sub_of_the_week
 from typing import List
 
 log = utils.setup_logging('Messages')
@@ -66,7 +66,7 @@ class Messages(commands.Cog, name='messages'):
                 embeds.append(embed)
                 if sub.name.lower().find('tender') != -1:
                     tender = True
-            await ctx.send(content=f"This week's Publix Subs at {sub_response[1]} are", embeds=embeds)
+            await ctx.send(content=f"This week's Publix Subs at {sub_response[1].name} are", embeds=embeds)
 
             if tender:
                 await ctx.send("https://tenor.com/view/lets-go-lets-goo-lest-gooooooooooooooooo-gif-19416648")
