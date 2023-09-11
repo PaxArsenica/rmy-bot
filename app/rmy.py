@@ -65,7 +65,9 @@ async def on_command_error(ctx: Context, err: Exception) -> None:
         embed = Embed(description=f"{ctx.author.name} is not an admin.", color=Color.brand_red())
         await ctx.send(embed=embed)
     elif isinstance(err, CommandNotFound):
-        await ctx.send(f"I don't recognize that command. Please type '{env['BOT_PREFIX']}list_commands' to see a list of what I can do!")
+        command = ctx.message.content.split(env['BOT_PREFIX'])[1].split(" ")[0]
+        log.info(f"{ctx.author}-{ctx.author.id} tried to execute invalid command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
+        await ctx.send(f"Sorry, {ctx.author.mention}! I don't recognize the command '{env['BOT_PREFIX']}{command}'. Please type '{env['BOT_PREFIX']}list_commands' to see a list of what I can do!")
     else:
         raise err
 
