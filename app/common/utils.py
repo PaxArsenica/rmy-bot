@@ -30,6 +30,7 @@ def setup_logging(name: str) -> Logger:
     return log
 
 log = setup_logging('utils')
+statuses = ["Tickling Arsène!", "Praying on R's downfall.", "Gaming with Trevor!"]
 
 def str_to_bool(s: str) -> bool:
     if s.lower() == 'true':

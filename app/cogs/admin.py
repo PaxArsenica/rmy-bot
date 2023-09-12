@@ -6,7 +6,6 @@ from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument
 
 log = utils.setup_logging('admin')
-statuses = ["Tickling Arsène!", "Praying on R's downfall.", "Gaming with Trevor!"]
 
 class Admin(commands.Cog, name='admin'):
     def __init__(self, bot: Bot) -> None:
@@ -52,7 +51,7 @@ class Admin(commands.Cog, name='admin'):
     async def status(self, ctx: Context, *, status: str = None) -> None:
         await ctx.message.delete()
         if not status:
-            status = random.choice(statuses)
+            status = random.choice(utils.statuses)
         status = status.strip('"').strip("'").strip()
 
         await self.bot.change_presence(status=Status.online, activity=CustomActivity(status))

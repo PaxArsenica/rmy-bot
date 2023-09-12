@@ -3,8 +3,9 @@ import boto3
 import common.utils as utils
 import discord
 import os
+import random
 from common.errors import NotAdmin
-from discord import Color, Embed, Message
+from discord import Color, CustomActivity, Embed, Message, Status
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument, CommandNotFound
@@ -43,6 +44,9 @@ async def on_ready() -> None:
         raise err
 
     log.info(f"{bot.user.name} has connected to Discord!")
+
+    status = random.choice(utils.statuses)
+    await bot.change_presence(status=Status.online, activity=CustomActivity(status))
 
 @bot.event
 async def on_message(message: Message) -> None:
