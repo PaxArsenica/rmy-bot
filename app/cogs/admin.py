@@ -1,11 +1,12 @@
 import common.utils as utils
+import random
 from discord import Color, CustomActivity, Embed, Status
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument
 
-log = utils.setup_logging('Admin')
-
+log = utils.setup_logging('admin')
+statuses = ["Tickling Arsène!", "Praying on R's downfall.", "Gaming with Trevor!"]
 
 class Admin(commands.Cog, name='admin'):
     def __init__(self, bot: Bot) -> None:
@@ -48,10 +49,14 @@ class Admin(commands.Cog, name='admin'):
 
     @utils.is_admin()
     @commands.command(name='status', description='Changes the status of the bot in the server.')
-    async def status(self, ctx: Context, status: str) -> None:
+    async def status(self, ctx: Context, *, status: str = None) -> None:
         await ctx.message.delete()
+        if not status:
+            status = random.choice(statuses)
+        status = status.strip('"').strip("'").strip()
+
         await self.bot.change_presence(status=Status.online, activity=CustomActivity(status))
-        log.info('Updated bot status.')
+        log.info(f'Updated bot status to "{status}".')
 
     @utils.is_admin()
     @commands.command(name='sync', description='Syncs all global commands.')
