@@ -3,14 +3,14 @@ import html
 import requests
 from models.pubsub_schemas import Store, Sub
 from os import environ as env
-from typing import List, Tuple
+from typing import Tuple
 
 log = utils.setup_logging('pubsub')
 defaultStore = Store("00776", "Publix at Piedmont")
 
-def fetch_sub_of_the_week(zip_code: str = "") -> Tuple[List[Sub], Store]:
+def fetch_sub_of_the_week(zip_code: str = "") -> Tuple[list[Sub], Store]:
     #Sub of the Week
-    sotw: List[Sub] = []
+    sotw: list[Sub] = []
     store = get_store(env['ZIP_CODE']) if not zip_code else get_store(zip_code)
 
     try:

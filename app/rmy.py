@@ -2,11 +2,11 @@ import asyncio
 import boto3
 import common.utils as utils
 import discord
+import discord.ext.commands as commands
 import os
 import random
 from common.errors import NotAdmin
-from discord import Color, CustomActivity, Embed, Message, Status
-from discord.ext import commands
+from discord import Colour, CustomActivity, Embed, Message, Status
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument, CommandNotFound
 from dotenv import load_dotenv
@@ -66,7 +66,7 @@ async def on_command_completion(ctx: Context) -> None:
 @bot.event
 async def on_command_error(ctx: Context, err: Exception) -> None:
     if isinstance(err, NotAdmin):
-        embed = Embed(description=f"{ctx.author.name} is not an admin.", color=Color.brand_red())
+        embed = Embed(description=f"{ctx.author.mention}, you are not an admin.", color=Colour.brand_red())
         await ctx.send(embed=embed)
     elif isinstance(err, CommandNotFound):
         command = ctx.message.content.split(env['BOT_PREFIX'])[1].split(" ")[0]

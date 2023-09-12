@@ -1,16 +1,15 @@
 import common.utils as utils
+import discord.ext.commands as commands
 import os
 from collections import namedtuple
-from discord import Color, Embed, File
-from discord.ext import commands
-from discord.ext.commands import Bot, Context
+from discord import Colour, Embed, File
+from discord.ext.commands import Bot, Cog, Context
 from os import environ as env
 from services.pubsub import fetch_sub_of_the_week
-from typing import List
 
 log = utils.setup_logging('Messages')
 
-class Messages(commands.Cog, name='messages'):
+class Messages(Cog, name='messages'):
     def __init__(self, bot: Bot) -> None:
         self.bot: Bot = bot
 
@@ -19,7 +18,7 @@ class Messages(commands.Cog, name='messages'):
         img_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "rmybot.png"))
 
         rmy_bot_logo = File(img_path, filename="rmybot.png")
-        about_embed = Embed(title='RMY Bot', color=Color.red(), description=f"My name is RMY Bot v0.1. My purpose is to entertain the members of RMY with fun and useful commands. Type '{env['BOT_PREFIX']} list_commands' to learn more about what I can do.")
+        about_embed = Embed(title='RMY Bot', color=Colour.red(), description=f"My name is RMY Bot 2.0. My purpose is to entertain the members of RMY with fun and useful commands. Type '{env['BOT_PREFIX']} list_commands' to learn more about what I can do.")
         about_embed.set_image(url='attachment://rmybot.png')
         await ctx.send(file=rmy_bot_logo, embed=about_embed)
 
@@ -38,9 +37,10 @@ class Messages(commands.Cog, name='messages'):
     @commands.hybrid_command(name='list_commands', description='Returns all commands available.')
     async def list_commands(self, ctx: Context) -> None:
         Command = namedtuple('Command', ['name', 'description'])
-        command_list: List[Command, Command] = []
-        admin_command_list: List[Command, Command] = []
-        embed = Embed(title="RMY Bot Commands", color=Color.green(), description="Here's a list of my commands:")
+        command_list: list[Command] = []
+        admin_command_list: list[Command] = []
+        embed = Embed(title="RMY Bot Commands", color=Colour.green(), description="Here's a list of my commands:")
+
         for command in self.bot.commands:
             if command.cog_name == 'admin':
                 if utils.is_admin(ctx.author.id):
@@ -49,7 +49,7 @@ class Messages(commands.Cog, name='messages'):
                 command_list.append(Command(command.name, command.description))
 
         if admin_command_list:
-            admin_embed = Embed(title="RMY Bot Commands", color=Color.red(), description="Here's a list of my admin commands:")
+            admin_embed = Embed(title="RMY Bot Commands", color=Colour.red(), description="Here's a list of my admin commands:")
             admin_command_list.sort()
             for command in admin_command_list:
                 admin_embed.add_field(name=command.name, value=command.description, inline=False)
@@ -69,12 +69,12 @@ class Messages(commands.Cog, name='messages'):
     async def pubsub(self, ctx: Context, zip_code: str = None) -> None:
         subs, store = fetch_sub_of_the_week(zip_code)
 
-        embeds: List[Embed] = []
+        embeds: list[Embed] = []
         tender = False
 
         if subs:
             for sub in subs:
-                embed = Embed(color=Color.green())
+                embed = Embed(color=Colour.green())
                 embed.add_field(name=sub.name, value=sub.description, inline=False)
                 embed.set_image(url=sub.image)
                 embeds.append(embed)

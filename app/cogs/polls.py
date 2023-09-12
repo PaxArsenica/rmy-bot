@@ -1,19 +1,24 @@
 import common.utils as utils
-from discord import Color, CustomActivity, Embed, Status
-from discord.ext import commands
-from discord.ext.commands import Bot, Context
+import discord.ext.commands as commands
+from discord import Colour, CustomActivity, Embed, Status
+from discord.ext.commands import Bot, Cog, Context
 from discord.ext.commands.errors import BadBoolArgument
 
 log = utils.setup_logging('Polls')
 
-class Polls(commands.Cog, name='polls'):
+class Polls(Cog, name='polls'):
     def __init__(self, bot: Bot) -> None:
         self.bot: Bot = bot
 
     @commands.hybrid_command(name='poll', description='Creates a poll in the server.')
-    async def poll(self, ctx: Context, poll_info: str) -> None:
+    async def poll(self, ctx: Context, name: str, max_participants: int, *, participants: str) -> None:
         log.info('Creating a poll...')
-        embed = Embed(description=f"This command is under development.", color=Color.brand_red())
+
+        log.info(name)
+        log.info(max_participants)
+        log.info(participants)
+
+        embed = Embed(description=f"This command is under development.", color=Colour.brand_red())
         await ctx.send(embed=embed)
     
 
