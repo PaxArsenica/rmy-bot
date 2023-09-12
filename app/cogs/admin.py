@@ -3,7 +3,7 @@ import discord.ext.commands as commands
 import random
 from discord import Colour, CustomActivity, Embed, Status
 from discord.ext.commands import Bot, Cog, Context
-from discord.ext.commands.errors import BadBoolArgument
+from typing import Optional
 
 log = utils.setup_logging('admin')
 
@@ -13,29 +13,19 @@ class Admin(Cog, name='admin'):
 
     @utils.is_admin()
     @commands.command(name='desync', description='Deyncs all global commands.')
-    async def desync(self, ctx: Context, guild: str = "True") -> None:
+    async def desync(self, ctx: Context, guild: bool = True) -> None:
         log.info("Desyncing commands...")
-        try:
-            guild_bool = utils.str_to_bool(guild)
-        except BadBoolArgument:
-            log.error("Invalid bool input... must be 'true' or 'false'.")
-            embed = Embed(description=f"Invalid bool input... must be 'true' or 'false'.", color=Colour.brand_red())
-            await ctx.send(embed=embed)
-
+        location = "in the server" if guild else "globally"
         embed = Embed(description="Desyncing commands...", color=Colour.yellow())
         await ctx.send(embed=embed)
 
-        if guild_bool:
-            self.bot.tree.clear_commands(guild=ctx.guild)
-            await self.bot.tree.sync(guild=ctx.guild)
-            embed = Embed(description="Commands have been desynced in the server.", color=Colour.brand_green())
-            log.info("Commands have been desynced in the server.")
-        else:
-            self.bot.tree.clear_commands(guild=None)
-            await self.bot.tree.sync()
-            embed = Embed(description="Commands have been desynced globally.", color=Colour.brand_green())
-            log.info("Commands have been desynced globally.")
+        self.bot.tree.clear_commands(guild=ctx.guild if guild else None)
+        await self.bot.tree.sync(guild=ctx.guild if guild else None)
 
+        embed.color = Colour.brand_green()
+        embed.description = f"Commands have been desynced {location}."
+
+        log.info(embed.description)
         await ctx.send(embed=embed)
 
     @utils.is_admin()
@@ -48,7 +38,7 @@ class Admin(Cog, name='admin'):
 
     @utils.is_admin()
     @commands.command(name='status', description='Changes the status of the bot in the server.')
-    async def status(self, ctx: Context, *, status: str = None) -> None:
+    async def status(self, ctx: Context, *, status: Optional[str] = None) -> None:
         await ctx.message.delete()
         if not status:
             status = random.choice(utils.statuses)
@@ -59,28 +49,20 @@ class Admin(Cog, name='admin'):
 
     @utils.is_admin()
     @commands.command(name='sync', description='Syncs all global commands.')
-    async def sync(self, ctx: Context, guild: str = "True") -> None:
+    async def sync(self, ctx: Context, guild: bool = True) -> None:
         log.info("Syncing commands...")
-        try:
-            guild_bool = utils.str_to_bool(guild)
-        except BadBoolArgument:
-            log.error("Invalid bool input... must be 'true' or 'false'.")
-            embed = Embed(description=f"Invalid bool input... must be 'true' or 'false'.", color=Colour.brand_red())
-            await ctx.send(embed=embed)
-
+        location = "in the server" if guild else "globally"
         embed = Embed(description="Syncing commands...", color=Colour.yellow())
         await ctx.send(embed=embed)
 
-        if guild_bool:
+        if guild:
             self.bot.tree.copy_global_to(guild=ctx.guild)
-            await self.bot.tree.sync(guild=ctx.guild)
-            embed = Embed(description="Commands have been synced to the server.", color=Colour.brand_green())
-            log.info("Commands have been synced to the server.")
-        else:
-            await self.bot.tree.sync()
-            embed = Embed(description="Commands have been synced globally.", color=Colour.brand_green())
-            log.info("Commands have been synced globally.")
+        await self.bot.tree.sync(guild=ctx.guild if guild else None)
+            
+        embed.color = Colour.brand_green()
+        embed.description = f"Commands have been synced {location}."
 
+        log.info(embed.description)
         await ctx.send(embed=embed)
 
 

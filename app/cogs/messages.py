@@ -6,6 +6,7 @@ from discord import Colour, Embed, File
 from discord.ext.commands import Bot, Cog, Context
 from os import environ as env
 from services.pubsub import fetch_sub_of_the_week
+from typing import Optional
 
 log = utils.setup_logging('Messages')
 
@@ -42,12 +43,9 @@ class Messages(Cog, name='messages'):
         embed = Embed(title="RMY Bot Commands", color=Colour.green(), description="Here's a list of my commands:")
 
         for command in self.bot.commands:
-            if command.cog_name == 'admin':
-                if utils.is_admin(ctx.author.id):
-                    admin_command_list.append(Command(command.name, command.description))
-            else:
-                command_list.append(Command(command.name, command.description))
-
+            rmy_command = Command(command.name, command.description)
+            admin_command_list.append(rmy_command) if command.cog_name == 'admin' and utils.is_admin(ctx.author.id) else command_list.append(rmy_command)
+                
         if admin_command_list:
             admin_embed = Embed(title="RMY Bot Commands", color=Colour.red(), description="Here's a list of my admin commands:")
             admin_command_list.sort()
@@ -66,7 +64,7 @@ class Messages(Cog, name='messages'):
         await ctx.send(f"It wouldn't be me if I didn't loot.")
 
     @commands.hybrid_command(name='pubsub', description='Posts the pubsub of the week.')
-    async def pubsub(self, ctx: Context, zip_code: str = None) -> None:
+    async def pubsub(self, ctx: Context, zip_code: Optional[str] = None) -> None:
         subs, store = fetch_sub_of_the_week(zip_code)
 
         embeds: list[Embed] = []
@@ -85,7 +83,8 @@ class Messages(Cog, name='messages'):
             if tender:
                 await ctx.send("https://tenor.com/view/lets-go-lets-goo-lest-gooooooooooooooooo-gif-19416648")
         else:
-            await ctx.send("There was an error while retrieving the Sub of the Week. Please try again later.")
+            embed = Embed(description='There was an error while retrieving the Sub of the Week. Please try again later.', color=Colour.brand_red())
+            await ctx.send(embed=embed)
 
     @commands.hybrid_command(name='roth', description='Posts the personal finance guide.')
     async def roth(self, ctx: Context) -> None:

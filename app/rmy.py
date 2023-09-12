@@ -16,7 +16,7 @@ from os import environ as env
 load_dotenv()
 log = utils.setup_logging('rmy')
 
-bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all(), help_command=None)
+bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all(), help_command = None)
 
 async def init_db() -> None:
     dynamodb = boto3.resource('dynamodb', region_name=env['AWS_DEFAULT_REGION'])
@@ -40,8 +40,6 @@ async def on_ready() -> None:
             log.info("Commands have been synced globally.")
     except BadBoolArgument:
         log.error("Invalid Sync value... not syncing.")
-    except Exception as err:
-        raise err
 
     log.info(f"{bot.user.name} has connected to Discord!")
 
@@ -57,23 +55,33 @@ async def on_message(message: Message) -> None:
 @bot.event
 async def on_command_completion(ctx: Context) -> None:
     command = ctx.command.qualified_name.split(" ")[0]
-    if ctx.guild:
-        command_log_message = f"{ctx.author}-{ctx.author.id} successfully completed '{command}' in {ctx.guild.name}-{ctx.guild.id}."  
-    else:
-        command_log_message = f"{ctx.author}-{ctx.author.id} successfully completed '{command}' in DMs."
+    command_log_location = f"{ctx.guild.name}-{ctx.guild.id}." if ctx.guild else "DMs."
+    command_log_message = f"{ctx.author}-{ctx.author.id} successfully completed '{command}' in {command_log_location}"
     log.info(command_log_message)
 
 @bot.event
 async def on_command_error(ctx: Context, err: Exception) -> None:
-    if isinstance(err, NotAdmin):
-        embed = Embed(description=f"{ctx.author.mention}, you are not an admin.", color=Colour.brand_red())
-        await ctx.send(embed=embed)
-    elif isinstance(err, CommandNotFound):
-        command = ctx.message.content.split(env['BOT_PREFIX'])[1].split(" ")[0]
-        log.info(f"{ctx.author}-{ctx.author.id} tried to execute invalid command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
-        await ctx.send(f"Sorry, {ctx.author.mention}! I don't recognize the command '{env['BOT_PREFIX']}{command}'. Please type '{env['BOT_PREFIX']}list_commands' to see a list of what I can do!")
-    else:
-        raise err
+    if ctx.command:
+        command = ctx.command.name
+    embed = Embed(description='Uh oh! There was an error.', color=Colour.brand_red())
+
+    match err:
+        case BadBoolArgument():
+            message = "Invalid bool input... must be 'true' or 'false'."
+            log.error(message)
+            embed.description = message
+        case CommandNotFound():
+            command = ctx.message.content.split(env['BOT_PREFIX'])[1].split(" ")[0]
+            log.error(f"{ctx.author}-{ctx.author.id} tried to execute invalid command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
+            embed.description = f"Sorry, {ctx.author.mention}! I don't recognize the command '{env['BOT_PREFIX']}{command}'. Please type '{env['BOT_PREFIX']}list_commands' to see a list of what I can do!"
+        case NotAdmin():
+            log.error(f"{ctx.author}-{ctx.author.id} tried to execute admin command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
+            embed.description = f"{ctx.author.mention}, you are not an admin."
+        case _:
+            log.error(err)
+            embed.description = str(err)
+
+    await ctx.send(embed=embed)
 
 asyncio.run(init_cogs())
 bot.run(env['TOKEN'])

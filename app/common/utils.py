@@ -9,7 +9,7 @@ from discord.ext.commands.errors import BadBoolArgument
 from discord.ext.commands._types import Check
 from logging import Logger
 from os import environ as env
-from typing import Any
+from typing import Any, Optional
 
 def debugger_is_active() -> bool:
     return hasattr(sys, 'gettrace') and sys.gettrace() is not None
@@ -41,7 +41,7 @@ def str_to_bool(s: str) -> bool:
         case _:
             raise BadBoolArgument("Invalid bool.")
 
-def is_admin(author_id: str = None) -> Check[Any] | bool:
+def is_admin(author_id: Optional[str] = None) -> Check[Any] | bool:
     async def predicate(ctx: Context) -> bool:
         if str(ctx.author.id) not in env['ADMINS']:
             log.error(f"{ctx.author.name} is not an admin.")

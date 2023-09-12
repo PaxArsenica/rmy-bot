@@ -6,7 +6,7 @@ from os import environ as env
 from typing import Tuple
 
 log = utils.setup_logging('pubsub')
-defaultStore = Store("00776", "Publix at Piedmont")
+default_store = Store("00776", "Publix at Piedmont")
 
 def fetch_sub_of_the_week(zip_code: str = "") -> Tuple[list[Sub], Store]:
     #Sub of the Week
@@ -37,10 +37,10 @@ def get_store(zip_code: str) -> Store:
         response.raise_for_status()
         if len(response.json()["Stores"]) == 0:
             log.warning(f"No stores nearby... default store is returned.")
-            return defaultStore
+            return default_store
     except Exception as err:
         log.error(f"Error during get_store request: {err}")
-        return defaultStore
+        return default_store
 
     id = response.json()["Stores"][0]["KEY"]
     name = response.json()["Stores"][0]["NAME"]
