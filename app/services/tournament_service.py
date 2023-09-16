@@ -75,7 +75,7 @@ def get_api_tournament(tournament: Tournament) -> Tournament:
         log.error(f"Error getting tournament: {str(err)}")
         raise TournamentNotFound(tournament, "Tournament not found from API.")
 
-def get_matches(tournament: Tournament) -> list(Match):
+def get_matches(tournament: Tournament) -> list[Match]:
     payload = {}
     payload['state'] = 'open'
 
