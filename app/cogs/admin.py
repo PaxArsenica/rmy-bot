@@ -1,9 +1,8 @@
-import common.utils as utils
 import discord.ext.commands as commands
 import random
+import utils.rmy_utils as utils
 from discord import Colour, CustomActivity, Embed, Status
 from discord.ext.commands import Bot, Cog, Context
-from typing import Optional
 
 log = utils.setup_logging('admin')
 
@@ -38,7 +37,7 @@ class Admin(Cog, name='admin'):
 
     @utils.is_admin()
     @commands.command(name='status', description='Changes the status of the bot in the server.')
-    async def status(self, ctx: Context, *, status: Optional[str] = None) -> None:
+    async def status(self, ctx: Context, *, status: str='') -> None:
         await ctx.message.delete()
         if not status:
             status = random.choice(utils.statuses)

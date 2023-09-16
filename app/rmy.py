@@ -1,26 +1,24 @@
 import asyncio
-import boto3
-import common.utils as utils
 import discord
 import discord.ext.commands as commands
 import os
 import random
-from common.errors import NotAdmin
+import utils.config as config
+import utils.rmy_utils as utils
+from db.dynamodb import DynamoDb
 from discord import Colour, CustomActivity, Embed, Message, Status
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument, CommandNotFound
-from dotenv import load_dotenv
-from os import environ as env
+from utils.errors import NotAdmin, RmyError
 
 
-load_dotenv()
 log = utils.setup_logging('rmy')
 
-bot = Bot(command_prefix=commands.when_mentioned_or(env['BOT_PREFIX']), intents=discord.Intents.all(), help_command = None)
+bot = Bot(command_prefix=commands.when_mentioned_or(config.BOT_PREFIX), intents=discord.Intents.all(), help_command = None)
 
 async def init_db() -> None:
-    dynamodb = boto3.resource('dynamodb', region_name=env['AWS_DEFAULT_REGION'])
-    mentionRequestsTable = dynamodb.Table('mention-requests')
+    db = DynamoDb()
+    log.info(f'Connected to {db.client.meta.service_name}')
 
 async def init_cogs() -> None:
     for file in os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}/cogs"):
@@ -34,7 +32,7 @@ async def init_cogs() -> None:
 @bot.event
 async def on_ready() -> None:
     try:
-        if utils.str_to_bool(env['STARTUP_SYNC']):
+        if utils.str_to_bool(config.STARTUP_SYNC):
             log.info("Syncing commands...")
             await bot.tree.sync()
             log.info("Commands have been synced globally.")
@@ -71,17 +69,20 @@ async def on_command_error(ctx: Context, err: Exception) -> None:
             log.error(message)
             embed.description = message
         case CommandNotFound():
-            command = ctx.message.content.split(env['BOT_PREFIX'])[1].split(" ")[0]
+            command = ctx.message.content.split(config.BOT_PREFIX)[1].split(" ")[0]
             log.error(f"{ctx.author}-{ctx.author.id} tried to execute invalid command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
-            embed.description = f"Sorry, {ctx.author.mention}! I don't recognize the command '{env['BOT_PREFIX']}{command}'. Please type '{env['BOT_PREFIX']}list_commands' to see a list of what I can do!"
+            embed.description = f"Sorry, {ctx.author.mention}! I don't recognize the command '{config.BOT_PREFIX}{command}'. Please type '{config.BOT_PREFIX}list_commands' to see a list of what I can do!"
         case NotAdmin():
             log.error(f"{ctx.author}-{ctx.author.id} tried to execute admin command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
             embed.description = f"{ctx.author.mention}, you are not an admin."
+        case RmyError():
+            embed.description = err.message
         case _:
             log.error(err)
-            embed.description = str(err)
+            raise err
 
     await ctx.send(embed=embed)
 
 asyncio.run(init_cogs())
-bot.run(env['TOKEN'])
+asyncio.run(init_db())
+bot.run(config.TOKEN)

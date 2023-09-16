@@ -1,12 +1,11 @@
-import common.utils as utils
 import discord.ext.commands as commands
 import os
+import services.pubsub_service as pubsub_service
+import utils.config as config
+import utils.rmy_utils as utils
 from collections import namedtuple
 from discord import Colour, Embed, File
 from discord.ext.commands import Bot, Cog, Context
-from os import environ as env
-from services.pubsub import fetch_sub_of_the_week
-from typing import Optional
 
 log = utils.setup_logging('Messages')
 
@@ -19,7 +18,7 @@ class Messages(Cog, name='messages'):
         img_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "rmybot.png"))
 
         rmy_bot_logo = File(img_path, filename="rmybot.png")
-        about_embed = Embed(title='RMY Bot', color=Colour.red(), description=f"My name is RMY Bot 2.0. My purpose is to entertain the members of RMY with fun and useful commands. Type '{env['BOT_PREFIX']} list_commands' to learn more about what I can do.")
+        about_embed = Embed(title='RMY Bot', color=Colour.red(), description=f"My name is RMY Bot 2.0. My purpose is to entertain the members of RMY with fun and useful commands. Type '{config.BOT_PREFIX}list_commands' to learn more about what I can do.")
         about_embed.set_image(url='attachment://rmybot.png')
         await ctx.send(file=rmy_bot_logo, embed=about_embed)
 
@@ -64,8 +63,8 @@ class Messages(Cog, name='messages'):
         await ctx.send(f"It wouldn't be me if I didn't loot.")
 
     @commands.hybrid_command(name='pubsub', description='Posts the pubsub of the week.')
-    async def pubsub(self, ctx: Context, zip_code: Optional[str] = None) -> None:
-        subs, store = fetch_sub_of_the_week(zip_code)
+    async def pubsub(self, ctx: Context, zip_code: str='') -> None:
+        subs, store = pubsub_service.fetch_sub_of_the_week(zip_code)
 
         embeds: list[Embed] = []
         tender = False
@@ -88,7 +87,7 @@ class Messages(Cog, name='messages'):
 
     @commands.hybrid_command(name='roth', description='Posts the personal finance guide.')
     async def roth(self, ctx: Context) -> None:
-        personal_finance_channel = self.bot.get_channel(int(env['RMY_PERSONAL_FINANCE_ID']))
+        personal_finance_channel = self.bot.get_channel(int(config.RMY_PERSONAL_FINANCE_ID))
         await ctx.send(f"You telling me you don't have a Roth IRA? You better open one up right mf now! And while you're at it, check out my guide to personal finance (see the pinned post in the #{personal_finance_channel.mention} channel)!")
     
 

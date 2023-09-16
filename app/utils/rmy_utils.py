@@ -2,25 +2,25 @@ import discord.ext.commands as commands
 import discord.utils as utils
 import logging
 import sys
-from common.errors import NotAdmin
+import utils.config as config
 from discord import Message
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import BadBoolArgument
 from discord.ext.commands._types import Check
 from logging import Logger
-from os import environ as env
-from typing import Any, Optional
+from typing import Any
+from utils.errors import NotAdmin
 
 def debugger_is_active() -> bool:
     return hasattr(sys, 'gettrace') and sys.gettrace() is not None
 
 def setup_logging(name: str) -> Logger:
     log = logging.getLogger(name)
-    log.setLevel(env['LOG_LEVEL'])
+    log.setLevel(config.LOG_LEVEL)
 
     if debugger_is_active():
-        file_handler = logging.FileHandler(filename=env['LOG_FILE'])
-        file_handler.setFormatter(logging.Formatter(env['LOG_FORMAT']))
+        file_handler = logging.FileHandler(filename=config.LOG_FILE)
+        file_handler.setFormatter(logging.Formatter(config.LOG_FORMAT))
         log.addHandler(file_handler)
 
     console_handler = logging.StreamHandler()
@@ -41,9 +41,9 @@ def str_to_bool(s: str) -> bool:
         case _:
             raise BadBoolArgument("Invalid bool.")
 
-def is_admin(author_id: Optional[str] = None) -> Check[Any] | bool:
+def is_admin(author_id: str='') -> Check[Any] | bool:
     async def predicate(ctx: Context) -> bool:
-        if str(ctx.author.id) not in env['ADMINS']:
+        if str(ctx.author.id) not in config.ADMINS:
             log.error(f"{ctx.author.name} is not an admin.")
             raise NotAdmin
 
@@ -52,7 +52,10 @@ def is_admin(author_id: Optional[str] = None) -> Check[Any] | bool:
     if not author_id:
         return commands.check(predicate)
     else:
-        return False if str(author_id) not in env['ADMINS'] else True
+        return False if str(author_id) not in config.ADMINS else True
 
 def is_bot(bot: Bot, message: Message) -> bool:
     return message.author == bot.user or message.author.bot
+
+def is_me(bot: Bot, message: Message) -> bool:
+    return message.author == bot.user
