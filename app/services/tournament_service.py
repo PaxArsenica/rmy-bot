@@ -7,7 +7,6 @@ from http import HTTPStatus
 from models.tournament_schemas import Match, Participant, Tournament
 from utils.errors import DuplicateTournamentError, MatchRetrieveError, NoParticipantsError, ParticipantError, TournamentCreateError, TournamentNotFound, TournamentStartError
 from requests import HTTPError, Response
-from typing import Any
 
 log = utils.setup_logging('tournament_service')
 db = DynamoDb(table=config.TOURNAMENTS_TABLE).table
@@ -59,6 +58,7 @@ def get_api_tournament(tournament: Tournament) -> Tournament:
         response = requests.get(f'{config.CHALLONGE_API_URL}/{tournament.id}{config.CREATE_TOURNAMENT_ENDPOINT}', headers=config.CHALLONGE_API_HEADERS, params=params)
         response.raise_for_status()
         tournament_response: Tournament = response.json(object_hook=Tournament.tournament_decoder)
+        #append missing match messages if they exist
         tournament_dict = Tournament.to_dict(tournament_response)
         db.update_item(Key={'name': str(tournament.name)},
                        UpdateExpression="SET #state = :state_val, participants = :participants_val, matches = :matches_val", 
@@ -111,8 +111,9 @@ def start_tournament(tournament: Tournament) -> Tournament:
             response_json: dict = response.json()
             errors: list = response_json.get('errors')
             if errors:
-                log.error(errors[0])
-                raise TournamentStartError(tournament.name, errors[0])
+                err = next(errors)
+                log.error(err)
+                raise TournamentStartError(tournament.name, err)
     except Exception as err:
         log.error(f"Error starting tournament: {str(err)}")
         raise TournamentStartError(tournament.name)

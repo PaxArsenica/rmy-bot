@@ -111,10 +111,11 @@ class Match:
 
 
 class Tournament:
-    def __init__(self, id: str, name: str, state: str = "", participants: list[Participant] = [], matches: list[Match] = []) -> None:
+    def __init__(self, id: str, name: str, state: str, url: str, participants: list[Participant] = [], matches: list[Match] = []) -> None:
         self.id = id
         self.name = name
         self.state = state
+        self.url = url
         self.participants = participants
         self.matches = matches
 
@@ -127,7 +128,7 @@ class Tournament:
     def from_dict(cls, tournament_dict: dict) -> Self:
         participants = list(map(Participant.from_dict, tournament_dict['participants']))
         matches = list(map(Match.from_dict, tournament_dict['matches']))
-        return cls(str(tournament_dict['id']), str(tournament_dict['name']), str(tournament_dict['state']), participants, matches)
+        return cls(str(tournament_dict['id']), str(tournament_dict['name']), str(tournament_dict['state']), tournament_dict['url'], participants, matches)
     
     @classmethod
     def get_db_tournament(cls, tournament: str) -> Self:
@@ -146,7 +147,8 @@ class Tournament:
         tournament_dict = {
             'id': str(tournament.id),
             'name': str(tournament.name),
-            'state': str(tournament.state)
+            'state': str(tournament.state),
+            'url': str(tournament.url)
         }
 
         participants_dict = []
@@ -172,7 +174,7 @@ class Tournament:
                 participants: list[Participant] = list(map(Participant.participant_decoder, tournament['participants']))
                 if tournament.get("matches"):
                     matches: list[Match] = [Match.match_decoder(match, participants) for match in tournament['matches']]
-            return Tournament(str(tournament['id']), str(tournament['name']), str(tournament['state']), participants, matches) 
+            return Tournament(str(tournament['id']), str(tournament['name']), str(tournament['state']), f"https://challonge.com/{str(tournament['url'])}", participants, matches)
         return obj
 
 class TournamentState(StrEnum):
