@@ -84,13 +84,14 @@ class Tournaments(Cog, name='tournaments'):
         return synced_tournament
 
     @commands.hybrid_command(name='tournament', description='Creates a tournament in the server.')
-    async def tournament(self, ctx: Context, name: str, *, participants: str) -> None:
+    async def tournament(self, ctx: Context, name: str, start_round_1: bool, *, participants: str) -> None:
         tournament: Tournament = await ctx.invoke(self.bot.get_command('create_tournament'), name=name)
         participant_response: list[Participant] = await ctx.invoke(self.bot.get_command('add_participants'), tournament=tournament, participants=participants)
         tournament.participants = participant_response
         await ctx.invoke(self.bot.get_command('start_tournament'), tournament=tournament)
         synced_tournament = tournament_service.get_api_tournament(tournament)
-        await ctx.invoke(self.bot.get_command('start_round'), tournament=synced_tournament, round=1)
+        if start_round_1:
+            await ctx.invoke(self.bot.get_command('start_round'), tournament=synced_tournament, round=1)
 
 
 async def setup(bot: Bot) -> None:
