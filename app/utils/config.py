@@ -24,8 +24,10 @@ CHALLONGE_API_HEADERS={"Authorization": f"Basic {b64encode(f'{CHALLONE_API_USERN
 CHALLONGE_API_URL = "https://api.challonge.com/v1/tournaments"
 CREATE_PARTICIPANTS_ENDPOINT = "participants/bulk_add.json"
 CREATE_TOURNAMENT_ENDPOINT = ".json"
+FINALIZE_TOURNAMENT_ENDPOINT = "finalize.json"
 GET_MATCHES_ENDPOINT = "matches.json"
 START_TOURNAMENT_ENDPOINT = "start.json"
+UPDATE_MATCHES_ENDPOINT = "matches"
 
 # DynamoDb Constants
 TOURNAMENTS_TABLE='tournaments'

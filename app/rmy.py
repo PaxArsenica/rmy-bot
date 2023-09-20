@@ -71,7 +71,8 @@ async def on_command_error(ctx: Context, err: Exception) -> None:
         case CommandNotFound():
             command = ctx.message.content.split(config.BOT_PREFIX)[1].split(" ")[0]
             log.error(f"{ctx.author}-{ctx.author.id} tried to execute invalid command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
-            embed.description = f"Sorry, {ctx.author.mention}! I don't recognize the command '{config.BOT_PREFIX}{command}'. Please type '{config.BOT_PREFIX}list_commands' to see a list of what I can do!"
+            list_commands_mention = await utils.mention_command(bot, 'list_commands')
+            embed.description = f"Sorry, {ctx.author.mention}! I don't recognize the command '{config.BOT_PREFIX}{command}'. Please use {list_commands_mention} to see a list of what I can do!"
         case NotAdmin():
             log.error(f"{ctx.author}-{ctx.author.id} tried to execute admin command '{command}' in {ctx.guild.name}-{ctx.guild.id}.")
             embed.description = f"{ctx.author.mention}, you are not an admin."

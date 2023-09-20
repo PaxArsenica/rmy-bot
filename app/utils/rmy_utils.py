@@ -4,7 +4,8 @@ import logging
 import sys
 import utils.config as config
 from discord import Message
-from discord.ext.commands import Bot, Context
+from discord.app_commands import AppCommand
+from discord.ext.commands import Bot, Command, Context
 from discord.ext.commands.errors import BadBoolArgument
 from discord.ext.commands._types import Check
 from logging import Logger
@@ -40,6 +41,12 @@ def str_to_bool(s: str) -> bool:
             return False
         case _:
             raise BadBoolArgument("Invalid bool.")
+
+async def mention_command(bot: Bot, name: str) -> Command:
+    commands: list[AppCommand] = await bot.tree.fetch_commands()
+    for command in commands:
+        if command.name == name:
+            return f'</{command.name}:{command.id}>'
 
 def is_admin(author_id: str='') -> Check[Any] | bool:
     async def predicate(ctx: Context) -> bool:

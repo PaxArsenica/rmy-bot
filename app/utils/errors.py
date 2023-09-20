@@ -24,6 +24,12 @@ class MatchRetrieveError(RmyError):
         self.message = f"{self.tournament}: {message}"
         super().__init__(self.message)
 
+class MatchUpdateError(RmyError):
+    def __init__(self, tournament: str, message: str="Error updating API match.") -> None:
+        self.tournament = tournament
+        self.message = f"{self.tournament}: {message}"
+        super().__init__(self.message)
+
 class NoParticipantsError(RmyError):
     def __init__(self, tournament: str, message: str="Does not have any participants") -> None:
         self.tournament = tournament
@@ -46,6 +52,18 @@ class TournamentCreateError(RmyError):
     def __init__(self, tournament: str, message: str="Error creating tournament") -> None:
         self.tournament = tournament
         self.message = f"{message}: {self.tournament}."
+        super().__init__(self.message)
+
+class TournamentFinishError(RmyError):
+    def __init__(self, tournament: str, message: str="Error finalizing tournament") -> None:
+        self.tournament = tournament
+        self.message = f"{self.tournament}: {message}."
+        super().__init__(self.message)
+
+class TournamentMaxRoundsError(RmyError):
+    def __init__(self, tournament: str, message: str="Max rounds exceeded") -> None:
+        self.tournament = tournament
+        self.message = f"{self.tournament}: {message}."
         super().__init__(self.message)
 
 class TournamentNotFound(RmyError):
