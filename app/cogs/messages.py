@@ -43,7 +43,11 @@ class Messages(Cog, name='messages'):
 
         for command in self.bot.commands:
             rmy_command = Command(command.name, command.description)
-            admin_command_list.append(rmy_command) if command.cog_name == 'admin' and utils.is_admin(ctx.author.id) else command_list.append(rmy_command)
+            if command.cog_name == 'admin':
+                if utils.is_admin(ctx.author.id):
+                    admin_command_list.append(rmy_command)
+            else:
+                command_list.append(rmy_command)
                 
         if admin_command_list:
             admin_embed = Embed(title="RMY Bot Commands", color=Colour.red(), description="Here's a list of my admin commands:")
