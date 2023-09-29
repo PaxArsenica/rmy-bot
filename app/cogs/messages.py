@@ -95,8 +95,8 @@ class Messages(Cog, name='messages'):
         await ctx.send(f"You telling me you don't have a Roth IRA? You better open one up right mf now! And while you're at it, check out my guide to personal finance (see the pinned post in the #{personal_finance_channel.mention} channel)!")
 
     @commands.hybrid_command(name='slap', description='Slaps someone in the discord.')
-    async def slap(self, ctx: Context, member: Member, reason: str) -> None:
-        await ctx.send(f'{ctx.author.mention} slapped {member.mention} because {reason}')
+    async def slap(self, ctx: Context, member: Member, reason: str = '') -> None:
+        await ctx.send(f'{ctx.author.mention} slapped {member.mention} because {reason}') if reason else await ctx.send(f'{ctx.author.mention} slapped {member.mention}')
 
     @commands.hybrid_command(name='ydr', description="Y'ALL DON'T READ!")
     async def ydr(self, ctx: Context, member: Member = None) -> None:
