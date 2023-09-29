@@ -99,7 +99,7 @@ class Tournaments(Cog, name='tournaments'):
 
         if tournament.max_round_parts[round-1] == '1':
             init_msg_content = f'The Rmy Brackets: [{tournament.name}]({tournament.url})\n\nRound {round}'
-            match int(tournament.max_rounds)-int(tournament.round):
+            match int(tournament.max_rounds)-int(round):
                 case 0:
                     init_msg_content = f'{init_msg_content} (Finals)'
                 case 1:
