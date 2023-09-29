@@ -4,7 +4,7 @@ import services.pubsub_service as pubsub_service
 import utils.config as config
 import utils.rmy_utils as utils
 from collections import namedtuple
-from discord import Colour, Embed, File
+from discord import Colour, Embed, File, Member
 from discord.ext.commands import Bot, Cog, Context
 
 log = utils.setup_logging('Messages')
@@ -93,6 +93,14 @@ class Messages(Cog, name='messages'):
     async def roth(self, ctx: Context) -> None:
         personal_finance_channel = self.bot.get_channel(int(config.RMY_PERSONAL_FINANCE_ID))
         await ctx.send(f"You telling me you don't have a Roth IRA? You better open one up right mf now! And while you're at it, check out my guide to personal finance (see the pinned post in the #{personal_finance_channel.mention} channel)!")
+
+    @commands.hybrid_command(name='slap', description='Slaps someone in the discord.')
+    async def slap(self, ctx: Context, member: Member, reason: str) -> None:
+        await ctx.send(f'{ctx.author.mention} slapped {member.mention} because {reason}')
+
+    @commands.hybrid_command(name='ydr', description="Y'ALL DON'T READ!")
+    async def ydr(self, ctx: Context, member: Member = None) -> None:
+        await ctx.invoke(self.bot.get_command('slap'), member=member, reason="THEY **DON'T READ!**") if member else await ctx.send(f"# **Y'ALL DON'T READ!**")
     
 
 async def setup(bot: Bot) -> None:
