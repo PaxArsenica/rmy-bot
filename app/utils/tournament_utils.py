@@ -4,37 +4,38 @@ from models.tournament_schemas import Match, Tournament, TournamentState
 from utils.errors import DuplicateParticipantError, TournamentMaxRoundsError, TournamentStateError
 
 async def check_state(ctx: Context, tournament: Tournament, tournament_state: str, message: str = '') -> None:
-    if tournament.state == TournamentState.AWAITING_REVIEW:
-        finish_tournament_mention = await utils.mention_command(ctx.bot, 'finish_tournament')
-        current_round_message = await ctx.fetch_message(int(tournament.round_message_id))
-        err_message = f"{message} {tournament.name} is awaiting review.\nRound -> {current_round_message.jump_url}\nWhen you are ready to finish the tournament please use {finish_tournament_mention}."
-
-    elif tournament.state == TournamentState.COMPLETE:
-        current_round_message = await ctx.fetch_message(int(tournament.round_message_id))
-        err_message = f"{message} {tournament.name} is {tournament.state}.\nTournament Finals -> {current_round_message.jump_url}"
-
-    elif tournament.state == TournamentState.PENDING:
-        err_message = f"{message} {tournament.name} is {tournament.state}."
-        if len(tournament.participants) < 2:
-            err_message = f"{err_message}\nPlease add at least 2 participants before you begin the tournament."
-        start_tournament_mention = await utils.mention_command(ctx.bot, 'start_tournament')
-        err_message = f"{err_message}\nWhen you are ready to begin the tournament please use {start_tournament_mention}."
-
-    elif tournament.state == TournamentState.UNDERWAY:
-        if int(tournament.max_round_parts[int(tournament.round)-1]) <= 1:
-            err_message = f"{message} {tournament.name} is {tournament.state} in Round {tournament.round} of {tournament.max_rounds}."
-        else:
-            err_message = f"{message} {tournament.name} is {tournament.state} in Round {tournament.round} (Part {tournament.round_part} of {tournament.max_round_parts[int(tournament.round)-1]}) of {tournament.max_rounds}."
-
-        if tournament.round_message_id:
+    match tournament.state:
+        case TournamentState.AWAITING_REVIEW:
+            finish_tournament_mention = await utils.mention_command(ctx.bot, 'finish_tournament')
             current_round_message = await ctx.fetch_message(int(tournament.round_message_id))
-            err_message = f'{err_message}\nRound -> {current_round_message.jump_url}'
-        else:
-            start_round_mention = await utils.mention_command(ctx.bot, 'start_round')
-            err_message = f'{err_message}\nWhen you are ready to start the first round please use {start_round_mention}'
+            err_message = f"{message} {tournament.name} is awaiting review.\nRound -> {current_round_message.jump_url}\nWhen you are ready to finish the tournament please use {finish_tournament_mention}."
 
-    else:
-        err_message = f"{message} {tournament.name} is {tournament.state}."
+        case TournamentState.COMPLETE:
+            current_round_message = await ctx.fetch_message(int(tournament.round_message_id))
+            err_message = f"{message} {tournament.name} is {tournament.state}.\nTournament Finals -> {current_round_message.jump_url}"
+
+        case TournamentState.PENDING:
+            err_message = f"{message} {tournament.name} is {tournament.state}."
+            if len(tournament.participants) < 2:
+                err_message = f"{err_message}\nPlease add at least 2 participants before you begin the tournament."
+            start_tournament_mention = await utils.mention_command(ctx.bot, 'start_tournament')
+            err_message = f"{err_message}\nWhen you are ready to begin the tournament please use {start_tournament_mention}."
+
+        case TournamentState.UNDERWAY:
+            if int(tournament.max_round_parts[int(tournament.round)-1]) <= 1:
+                err_message = f"{message} {tournament.name} is {tournament.state} in Round {tournament.round} of {tournament.max_rounds}."
+            else:
+                err_message = f"{message} {tournament.name} is {tournament.state} in Round {tournament.round} (Part {tournament.round_part} of {tournament.max_round_parts[int(tournament.round)-1]}) of {tournament.max_rounds}."
+
+            if tournament.round_message_id:
+                current_round_message = await ctx.fetch_message(int(tournament.round_message_id))
+                err_message = f'{err_message}\nRound -> {current_round_message.jump_url}'
+            else:
+                start_round_mention = await utils.mention_command(ctx.bot, 'start_round')
+                err_message = f'{err_message}\nWhen you are ready to start the first round please use {start_round_mention}'
+
+        case _:
+            err_message = f"{message} {tournament.name} is {tournament.state}."
 
     if tournament.state != tournament_state:
         raise TournamentStateError(tournament.name, err_message)
