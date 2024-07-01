@@ -7,12 +7,16 @@ import utils.config as config
 import utils.rmy_utils as utils
 from db.dynamodb import DynamoDb
 from discord import Colour, CustomActivity, Embed, Message, Status
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Bot, Context, HelpCommand
 from discord.ext.commands.errors import BadBoolArgument, CommandNotFound
 from utils.errors import NotAdmin, RmyError
 
 
 log = utils.setup_logging('rmy')
+
+class RmyHelpCommand(HelpCommand):
+    def __init__(self):
+        super().__init__()
 
 bot = Bot(command_prefix=commands.when_mentioned_or(config.BOT_PREFIX), intents=discord.Intents.all(), help_command = None)
 
