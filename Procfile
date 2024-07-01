@@ -1,1 +1,1 @@
-worker: python rmy.py
+worker: python app/rmy.py
